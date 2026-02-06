@@ -1,150 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>ESAN - Trayectoria histórica</title>
-
-<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-<script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+  <meta charset="utf-8">
+  <title>ESAN - Trayectoria histórica</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 </head>
 
 <body>
+  <a-scene>
+    <a-assets>
+      <img id="esan360" src="patio.jpg">
+      <video id="videoUni" src="video2.mp4" preload="auto" loop="false" crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </a-assets>
 
-<a-scene>
+    <a-sky src="#esan360" rotation="0 -90 0"></a-sky>
 
-  <!-- ASSETS -->
-  <a-assets>
-    <img id="imgLobby" src="gth.jpeg">
-    <img id="imgAuditorio" src="butacas.jpg">
-    <video id="videoUni" src="video3.mp4" crossorigin="anonymous" playsinline webkit-playsinline></video>
-  </a-assets>
+    <a-sphere
+      id="telonNegro"
+      radius="60"
+      material="color: #000; side: back; transparent: true; opacity: 0; shader: flat"
+      animation__oscurecer="property: material.opacity; to: 1; dur: 2000; startEvents: cineStart"
+      animation__aclarar="property: material.opacity; to: 0; dur: 2000; startEvents: cineEnd">
+    </a-sphere>
 
-  <!-- ENTORNOS -->
-  <a-sky id="skyPrincipal" src="#imgLobby" radius="40" rotation="0 -90 0"></a-sky>
-  <a-sky id="skyButacas" src="#imgAuditorio" radius="40" rotation="0 -90 0" visible="false"></a-sky>
+    <a-entity id="grupoVideo" position="0 1.6 -4" visible="false">
+      <a-video id="pantallaVideo" src="#videoUni" width="5" height="3"></a-video>
 
-  <!-- CAPA PARA OSCURECER SOLO LAS BUTACAS -->
-  <a-entity id="oscurecerButacas"
-            geometry="primitive: sphere; radius: 39"
-            material="shader: flat; color: black; side: back; transparent: true; opacity: 0"
-            visible="false">
-  </a-entity>
+      <a-entity id="controles" position="0 -1.9 0.1">
+        <a-circle id="btnReset" class="clickable" color="#FFFFFF" radius="0.2" position="-1.2 0 0">
+          <a-text value="REINICIO" align="center" color="#000000" width="3"></a-text>
+        </a-circle>
 
-  <!-- VIDEO (SIEMPRE CLARO) -->
-  <a-video id="pantallaVideo"
-           src="#videoUni"
-           width="30"
-           height="10"
-           position="-27.5 2.5 -11.7"
-           look-at="[camera]"
-           visible="false"
-           material="shader: flat"
-           animation__entrar="property: scale; from: 0 0 0; to: 1 1 1; dur: 3000; easing: easeOutQuad; startEvents: videoEntra">
-  </a-video>
+        <a-circle id="btnNormal" class="clickable" color="#FFFFFF" radius="0.2" position="-0.6 0 0">
+          <a-text value="1x" align="center" color="#FF0000" width="3"></a-text>
+        </a-circle>
 
-  <!-- BOTÓN -->
-  <a-entity id="contenedorBoton"
-            position="0 1.6 -15"
-            animation="property: position; to: 0 1.6 -2.5; dur: 8000; easing: easeOutCubic; delay: 500">
+        <a-circle id="btnPausa" class="clickable" color="#FF0000" radius="0.25" position="0 0 0">
+          <a-text id="txtPausa" value="PAUSA" align="center" color="#FFFFFF" width="3"></a-text>
+        </a-circle>
 
-    <a-circle id="btnAccion"
-              class="clickable"
-              color="#000"
-              opacity="0.7"
-              radius="0.7"
-              animation__hover="property: scale; to: 1.2 1.2 1; dur: 200; startEvents: mouseenter"
-              animation__leave="property: scale; to: 1 1 1; dur: 200; startEvents: mouseleave">
-
-      <a-text id="textoBoton"
-              value="CONOCE NUESTRA\nHISTORIA"
-              align="center"
-              color="#FFFFFF"
-              width="1"
-              wrap-count="20"
-              anchor="center"
-              baseline="center">
-      </a-text>
-
-    </a-circle>
-  </a-entity>
-
-  <!-- CÁMARA -->
-  <a-entity id="rig">
-
-    <a-entity camera look-controls position="0 1.6 0">
-      <a-entity cursor="fuse: false; rayOrigin: mouse"
-                raycaster="objects: .clickable"></a-entity>
+        <a-circle id="btnRapido" class="clickable" color="#FFFFFF" radius="0.2" position="0.6 0 0">
+          <a-text value="2x >>" align="center" color="#FF0000" width="3"></a-text>
+        </a-circle>
+        
+        <a-circle id="btnSalir" class="clickable" color="#FF0000" radius="0.2" position="1.3 0 0">
+          <a-text value="X" align="center" color="#FFFFFF" width="3"></a-text>
+        </a-circle>
+      </a-entity>
     </a-entity>
 
-    <a-entity laser-controls="hand: right"
-              raycaster="objects: .clickable; far: 50"></a-entity>
+    <a-entity id="contenedorBoton" position="0 1.6 -2.5" scale="0 0 0"
+              animation__crecer="property: scale; from: 0 0 0; to: 1 1 1; dur: 1000; easing: easeOutElastic; startEvents: animarBoton">
+      <a-circle id="btnAccion" class="clickable" color="#000000" opacity="0.8" radius="0.65">
+        <a-text id="textoBoton" value="CONOCE NUESTRA\nHISTORIA" align="center" color="#FFFFFF" width="3"></a-text>
+      </a-circle>
+    </a-entity>
 
-    <a-entity laser-controls="hand: left"
-              raycaster="objects: .clickable; far: 50"></a-entity>
+    <a-entity camera look-controls position="0 1.6 0">
+      <a-cursor color="#FFD700" raycaster="objects: .clickable"></a-cursor>
+    </a-entity>
+  </a-scene>
 
-  </a-entity>
+  <script>
+    const video = document.querySelector('#videoUni');
+    const grupoVideo = document.querySelector('#grupoVideo');
+    const contenedorBtn = document.querySelector('#contenedorBoton');
+    const textoBoton = document.querySelector('#textoBoton');
+    const telon = document.querySelector('#telonNegro');
+    const txtPausa = document.querySelector('#txtPausa');
 
-</a-scene>
+    // Al cargar la escena, el botón crece automáticamente
+    window.onload = () => {
+      setTimeout(() => {
+        contenedorBtn.emit('animarBoton');
+      }, 500);
+    };
 
-<script>
+    // Lógica para iniciar el video
+    document.querySelector('#btnAccion').addEventListener('click', () => {
+      // Desaparece el botón antes de entrar al video
+      contenedorBtn.setAttribute('scale', '0 0 0');
+      contenedorBtn.setAttribute('visible', 'false');
+      
+      telon.emit('cineStart');
+      
+      setTimeout(() => {
+        grupoVideo.setAttribute('visible', 'true');
+        video.play();
+      }, 1500);
+    });
 
-const video = document.querySelector('#videoUni');
-const pantalla = document.querySelector('#pantallaVideo');
-const contenedorBtn = document.querySelector('#contenedorBoton');
-const btnAccion = document.querySelector('#btnAccion');
-const textoBoton = document.querySelector('#textoBoton');
-const skyPrincipal = document.querySelector('#skyPrincipal');
-const skyButacas = document.querySelector('#skyButacas');
-const oscurecerButacas = document.querySelector('#oscurecerButacas');
+    // Función para resetear y mostrar el menú
+    function volverAlMenu() {
+      video.pause();
+      video.currentTime = 0;
+      grupoVideo.setAttribute('visible', 'false');
+      telon.emit('cineEnd');
 
-const animacionEntrada =
-  "property: position; to: 0 1.6 -2.5; dur: 8000; easing: easeOutCubic; delay: 500";
+      // Cambiamos el texto para la próxima vez
+      textoBoton.setAttribute('value', 'VUELVE A VER\nNUESTRA HISTORIA');
+      
+      // Hacemos visible el contenedor y disparamos la animación de crecimiento
+      contenedorBtn.setAttribute('visible', 'true');
+      contenedorBtn.emit('animarBoton');
+    }
 
-// CLICK BOTÓN
-btnAccion.addEventListener('click', () => {
+    // BOTÓN REINICIO (Dentro del video)
+    document.querySelector('#btnReset').addEventListener('click', () => {
+      video.currentTime = 0;
+      video.play();
+      txtPausa.setAttribute('value', 'PAUSA');
+    });
 
-  contenedorBtn.setAttribute('visible', 'false');
+    // BOTÓN SALIR
+    document.querySelector('#btnSalir').addEventListener('click', volverAlMenu);
 
-  skyPrincipal.setAttribute('visible', 'false');
-  skyButacas.setAttribute('visible', 'true');
+    // CUANDO EL VIDEO TERMINA
+    video.addEventListener('ended', volverAlMenu);
 
-  // APAGAR LUCES DEL AUDITORIO
-  oscurecerButacas.setAttribute('visible', 'true');
-  oscurecerButacas.setAttribute('material', 'opacity: 0.85');
+    // PAUSA / PLAY
+    document.querySelector('#btnPausa').addEventListener('click', () => {
+      if (video.paused) { video.play(); txtPausa.setAttribute('value', 'PAUSA'); }
+      else { video.pause(); txtPausa.setAttribute('value', 'PLAY'); }
+    });
 
-  video.currentTime = 0;
-  pantalla.setAttribute('visible', 'true');
-
-  setTimeout(() => {
-    pantalla.emit('videoEntra');
-    video.play();
-  }, 500);
-});
-
-// FIN DEL VIDEO
-video.addEventListener('ended', () => {
-
-  pantalla.setAttribute('visible', 'false');
-  skyButacas.setAttribute('visible', 'false');
-  skyPrincipal.setAttribute('visible', 'true');
-
-  // PRENDER LUCES
-  oscurecerButacas.setAttribute('material', 'opacity: 0');
-  oscurecerButacas.setAttribute('visible', 'false');
-
-  textoBoton.setAttribute('value', 'VUELVE A VER\nNUESTRA\nHISTORIA');
-
-  contenedorBtn.setAttribute('visible', 'true');
-  contenedorBtn.setAttribute('position', '0 1.6 -15');
-  contenedorBtn.removeAttribute('animation');
-
-  setTimeout(() => {
-    contenedorBtn.setAttribute('animation', animacionEntrada);
-  }, 50);
-});
-
-</script>
-
+    document.querySelector('#btnNormal').addEventListener('click', () => { video.playbackRate = 1.0; });
+    document.querySelector('#btnRapido').addEventListener('click', () => { video.playbackRate = 4.0; });
+  </script>
 </body>
 </html>
 
