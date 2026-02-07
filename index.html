@@ -87,7 +87,7 @@
       return `${min}:${seg.toString().padStart(2, '0')}`;
     }
 
-    // Generar estrellas una sola vez con parpadeo individual
+    // Generar estrellas con parpadeo
     for (let i = 0; i < 500; i++) {
         let estrella = document.createElement('a-sphere');
         let theta = Math.random() * Math.PI * 2;
@@ -98,8 +98,6 @@
         estrella.setAttribute('position', `${x} ${y} ${z}`);
         estrella.setAttribute('radius', Math.random() * 0.08);
         estrella.setAttribute('material', 'color: #FFF; shader: flat');
-        
-        // Animación de parpadeo (brillo)
         estrella.setAttribute('animation', {
             property: 'material.opacity',
             from: 0.3,
@@ -108,7 +106,6 @@
             dir: 'alternate',
             loop: true
         });
-        
         estrellasContainer.appendChild(estrella);
     }
 
@@ -116,20 +113,19 @@
       setTimeout(() => contenedorBtn.emit('animarBoton'), 800);
     };
 
-    // EVENTO DEL BOTÓN PRINCIPAL
+    // EVENTO DEL BOTÓN PRINCIPAL ACTUALIZADO
     document.querySelector('#btnAccion').addEventListener('click', () => {
       contenedorBtn.setAttribute('visible', 'false');
       telon.emit('cineStart'); 
 
-      // APARECEN LAS ESTRELLAS DESPUÉS DE UN MOMENTO (cuando el telón ya está oscuro)
+      // EL VIDEO APARECE Y REPRODUCE DE INMEDIATO
+      grupoVideo.setAttribute('visible', 'true');
+      video.play();
+
+      // LAS ESTRELLAS ESPERAN UN POCO PARA NO CHOCAR CON LA LUZ DEL PATIO
       setTimeout(() => {
         estrellasContainer.setAttribute('visible', 'true');
-      }, 1200); 
-
-      setTimeout(() => {
-        grupoVideo.setAttribute('visible', 'true');
-        video.play();
-      }, 1500);
+      }, 800); 
     });
 
     function volverAlMenu() {
@@ -137,20 +133,15 @@
       video.currentTime = 0;
       grupoVideo.setAttribute('visible', 'false');
       telon.emit('cineEnd'); 
-
-      // SE OCULTAN LAS ESTRELLAS DE INMEDIATO
       estrellasContainer.setAttribute('visible', 'false');
-
       textoBoton.setAttribute('value', 'VUELVE A VER\nNUESTRA HISTORIA');
       contenedorBtn.setAttribute('visible', 'true');
       contenedorBtn.emit('animarBoton');
-
       barraProgreso.setAttribute('width', 0.01);
       barraProgreso.setAttribute('position', '-2.5 -1.6 0.02');
       textoDuracion.setAttribute('value', '0:00 / 2:02');
     }
 
-    // Controles de video
     document.querySelector('#btnReset').addEventListener('click', () => {
       video.currentTime = 0;
       video.play();
