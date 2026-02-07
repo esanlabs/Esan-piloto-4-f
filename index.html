@@ -15,7 +15,8 @@
     </a-assets>
 
     <a-sky src="#esan360" rotation="0 -90 0"></a-sky>
-    <a-entity id="estrellas" visible="true"></a-entity>
+    
+    <a-entity id="estrellas" visible="false"></a-entity>
 
     <a-sphere
       id="telonNegro"
@@ -25,62 +26,33 @@
       animation__aclarar="property: material.opacity; to: 0; dur: 2000; startEvents: cineEnd">
     </a-sphere>
 
-    <!-- VIDEO -->
     <a-entity id="grupoVideo" position="0 1.6 -4" visible="false">
       <a-video id="pantallaVideo" src="#videoUni" width="5" height="3"></a-video>
 
-      <!-- BARRA DE PROGRESO -->
-      <a-plane
-        id="barraFondo"
-        width="5"
-        height="0.12"
-        color="#696a6d"
-        position="0 -1.6 0.01">
-      </a-plane>
+      <a-plane id="barraFondo" width="5" height="0.12" color="#696a6d" position="0 -1.6 0.01"></a-plane>
+      <a-plane id="barraProgreso" width="0.01" height="0.12" color="#E3173E" position="-2.5 -1.6 0.02"></a-plane>
 
-      <a-plane
-        id="barraProgreso"
-        width="0.01"
-        height="0.12"
-        color="#E3173E"
-        position="-2.5 -1.6 0.02">
-      </a-plane>
+      <a-text id="textoDuracion" value="0:00 / 2:02" color="#FFFFFF" width="3" align="right" position="2.4 -1.48 0.10"></a-text>
 
-      <!-- TIEMPO (PEGADO A LA BARRA) -->
-      <a-text
-        id="textoDuracion"
-        value="0:00 / 2:02"
-        color="#FFFFFF"
-        width="3"
-        align="right"
-        position="2.4 -1.48 0.10">
-      </a-text>
-
-      <!-- CONTROLES -->
       <a-entity id="controles" position="0 -1.9 0.1">
         <a-circle id="btnReset" class="clickable" color="#FFFFFF" radius="0.2" position="-1.2 0 0">
           <a-text value="Reiniciar" align="center" color="#000000" width="2"></a-text>
         </a-circle>
-
         <a-circle id="btnNormal" class="clickable" color="#FFFFFF" radius="0.2" position="-0.6 0 0">
           <a-text value="1x" align="center" color="#E3173E" width="2"></a-text>
         </a-circle>
-
         <a-circle id="btnPausa" class="clickable" color="#E3173E" radius="0.25" position="0 0 0">
           <a-text id="txtPausa" value="PAUSA" align="center" color="#FFFFFF" width="2"></a-text>
         </a-circle>
-
         <a-circle id="btnRapido" class="clickable" color="#FFFFFF" radius="0.2" position="0.6 0 0">
           <a-text value="2x >>" align="center" color="#E3173E" width="2"></a-text>
         </a-circle>
-        
         <a-circle id="btnSalir" class="clickable" color="#E3173E" radius="0.2" position="1.3 0 0">
           <a-text value="Volver al\ninicio" align="center" color="#FFFFFF" width="2"></a-text>
         </a-circle>
       </a-entity>
     </a-entity>
 
-    <!-- BOTÓN INICIAL -->
     <a-entity id="contenedorBoton" position="0 1.6 -2.5" scale="0.001 0.001 0.001"
               animation__crecer="property: scale; from: 0.001 0.001 0.001; to: 1 1 1; dur: 2500; easing: easeOutCubic; startEvents: animarBoton">
       <a-circle id="btnAccion" class="clickable" color="#000000" opacity="0.8" radius="0.65">
@@ -104,7 +76,7 @@
     const textoDuracion = document.querySelector('#textoDuracion');
     const estrellasContainer = document.querySelector('#estrellas');
 
-    const DURACION_TOTAL = 114; // 1:54 en segundos
+    const DURACION_TOTAL = 114; 
     const ANCHO_BARRA = 5;
 
     function formatearTiempo(segundos) {
@@ -113,27 +85,31 @@
       return `${min}:${seg.toString().padStart(2, '0')}`;
     }
 
-    // Generar estrellas
-        for (let i = 0; i < 500; i++) {
-            let estrella = document.createElement('a-sphere');
-            let theta = Math.random() * Math.PI * 2;
-            let phi = Math.acos((Math.random() * 2) - 1);
-            let x = 50 * Math.sin(phi) * Math.cos(theta);
-            let y = 50 * Math.sin(phi) * Math.sin(theta);
-            let z = 50 * Math.cos(phi);
-            estrella.setAttribute('position', `${x} ${y} ${z}`);
-            estrella.setAttribute('radius', Math.random() * 0.15);
-            estrella.setAttribute('material', 'color: #FFF; shader: flat');
-            estrellasContainer.appendChild(estrella);
-        }
+    // Generar estrellas una sola vez al cargar
+    for (let i = 0; i < 500; i++) {
+        let estrella = document.createElement('a-sphere');
+        let theta = Math.random() * Math.PI * 2;
+        let phi = Math.acos((Math.random() * 2) - 1);
+        let x = 50 * Math.sin(phi) * Math.cos(theta);
+        let y = 50 * Math.sin(phi) * Math.sin(theta);
+        let z = 50 * Math.cos(phi);
+        estrella.setAttribute('position', `${x} ${y} ${z}`);
+        estrella.setAttribute('radius', Math.random() * 0.08); // Tamaño más real
+        estrella.setAttribute('material', 'color: #FFF; shader: flat');
+        estrellasContainer.appendChild(estrella);
+    }
 
     window.onload = () => {
       setTimeout(() => contenedorBtn.emit('animarBoton'), 800);
     };
 
+    // EVENTO DEL BOTÓN PRINCIPAL
     document.querySelector('#btnAccion').addEventListener('click', () => {
       contenedorBtn.setAttribute('visible', 'false');
-      telon.emit('cineStart');
+      telon.emit('cineStart'); // Oscurece el fondo
+
+      // APARECEN LAS ESTRELLAS
+      estrellasContainer.setAttribute('visible', 'true');
 
       setTimeout(() => {
         grupoVideo.setAttribute('visible', 'true');
@@ -145,7 +121,10 @@
       video.pause();
       video.currentTime = 0;
       grupoVideo.setAttribute('visible', 'false');
-      telon.emit('cineEnd');
+      telon.emit('cineEnd'); // Aclara el fondo
+
+      // SE OCULTAN LAS ESTRELLAS
+      estrellasContainer.setAttribute('visible', 'false');
 
       textoBoton.setAttribute('value', 'VUELVE A VER\nNUESTRA HISTORIA');
       contenedorBtn.setAttribute('visible', 'true');
@@ -156,6 +135,7 @@
       textoDuracion.setAttribute('value', '0:00 / 2:02');
     }
 
+    // Controles de video
     document.querySelector('#btnReset').addEventListener('click', () => {
       video.currentTime = 0;
       video.play();
@@ -181,17 +161,9 @@
     video.addEventListener('timeupdate', () => {
       const tiempoActual = Math.min(video.currentTime, DURACION_TOTAL);
       const progreso = tiempoActual / DURACION_TOTAL;
-
       barraProgreso.setAttribute('width', progreso * ANCHO_BARRA);
-      barraProgreso.setAttribute(
-        'position',
-        `${-2.5 + (progreso * ANCHO_BARRA) / 2} -1.6 0.02`
-      );
-
-      textoDuracion.setAttribute(
-        'value',
-        `${formatearTiempo(tiempoActual)} / 2:02`
-      );
+      barraProgreso.setAttribute('position', `${-2.5 + (progreso * ANCHO_BARRA) / 2} -1.6 0.02`);
+      textoDuracion.setAttribute('value', `${formatearTiempo(tiempoActual)} / 2:02`);
     });
   </script>
 </body>
