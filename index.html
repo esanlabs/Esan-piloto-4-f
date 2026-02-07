@@ -30,10 +30,8 @@
 
     <a-entity id="grupoVideo" position="0 1.6 -4" visible="false">
       <a-video id="pantallaVideo" src="#videoUni" width="5" height="3"></a-video>
-
       <a-plane id="barraFondo" width="5" height="0.12" color="#696a6d" position="0 -1.6 0.01"></a-plane>
       <a-plane id="barraProgreso" width="0.01" height="0.12" color="#E3173E" position="-2.5 -1.6 0.02"></a-plane>
-
       <a-text id="textoDuracion" value="0:00 / 2:02" color="#FFFFFF" width="3" align="right" position="2.4 -1.48 0.10"></a-text>
 
       <a-entity id="controles" position="0 -1.9 0.1">
@@ -55,15 +53,17 @@
       </a-entity>
     </a-entity>
 
-    <a-entity id="contenedorBoton" position="0 1.6 -2.5" scale="0.001 0.001 0.001"
-              animation__crecer="property: scale; from: 0.001 0.001 0.001; to: 1 1 1; dur: 2500; easing: easeOutCubic; startEvents: animarBoton">
-      <a-circle id="btnAccion" class="clickable" color="#000000" opacity="0.8" radius="0.65">
+    <a-entity id="contenedorBoton" position="0 1.6 -3" scale="1 1 1" visible="true">
+      <a-circle id="btnAccion" class="clickable" color="#000000" opacity="0.8" radius="0.65"
+                animation__pulse="property: scale; to: 1.1 1.1 1.1; dur: 1000; dir: alternate; loop: true">
         <a-text id="textoBoton" value="CONOCE NUESTRA\nHISTORIA" align="center" color="#FFFFFF" width="3"></a-text>
       </a-circle>
     </a-entity>
 
-    <a-entity camera look-controls position="0 1.6 0">
-      <a-cursor color="#FFD700" raycaster="objects: .clickable"></a-cursor>
+    <a-entity id="rig" position="0 0 0">
+      <a-camera look-controls wasd-controls>
+        <a-cursor color="#FFD700" raycaster="objects: .clickable"></a-cursor>
+      </a-camera>
     </a-entity>
   </a-scene>
 
@@ -87,7 +87,7 @@
       return `${min}:${seg.toString().padStart(2, '0')}`;
     }
 
-    // Generar estrellas con parpadeo
+    // Generar estrellas
     for (let i = 0; i < 500; i++) {
         let estrella = document.createElement('a-sphere');
         let theta = Math.random() * Math.PI * 2;
@@ -109,20 +109,17 @@
         estrellasContainer.appendChild(estrella);
     }
 
-    window.onload = () => {
-      setTimeout(() => contenedorBtn.emit('animarBoton'), 800);
-    };
+    // Usar el evento de escena cargada en lugar de window.onload
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      console.log("Escena cargada en VR");
+      contenedorBtn.setAttribute('visible', 'true');
+    });
 
-    // EVENTO DEL BOTÓN PRINCIPAL ACTUALIZADO
     document.querySelector('#btnAccion').addEventListener('click', () => {
       contenedorBtn.setAttribute('visible', 'false');
       telon.emit('cineStart'); 
-
-      // EL VIDEO APARECE Y REPRODUCE DE INMEDIATO
       grupoVideo.setAttribute('visible', 'true');
       video.play();
-
-      // LAS ESTRELLAS ESPERAN UN POCO PARA NO CHOCAR CON LA LUZ DEL PATIO
       setTimeout(() => {
         estrellasContainer.setAttribute('visible', 'true');
       }, 800); 
@@ -136,10 +133,8 @@
       estrellasContainer.setAttribute('visible', 'false');
       textoBoton.setAttribute('value', 'VUELVE A VER\nNUESTRA HISTORIA');
       contenedorBtn.setAttribute('visible', 'true');
-      contenedorBtn.emit('animarBoton');
       barraProgreso.setAttribute('width', 0.01);
       barraProgreso.setAttribute('position', '-2.5 -1.6 0.02');
-      textoDuracion.setAttribute('value', '0:00 / 2:02');
     }
 
     document.querySelector('#btnReset').addEventListener('click', () => {
@@ -152,13 +147,8 @@
     video.addEventListener('ended', volverAlMenu);
 
     document.querySelector('#btnPausa').addEventListener('click', () => {
-      if (video.paused) {
-        video.play();
-        txtPausa.setAttribute('value', 'PAUSA');
-      } else {
-        video.pause();
-        txtPausa.setAttribute('value', 'PLAY');
-      }
+      if (video.paused) { video.play(); txtPausa.setAttribute('value', 'PAUSA'); }
+      else { video.pause(); txtPausa.setAttribute('value', 'PLAY'); }
     });
 
     document.querySelector('#btnNormal').addEventListener('click', () => video.playbackRate = 1);
@@ -174,14 +164,6 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 
