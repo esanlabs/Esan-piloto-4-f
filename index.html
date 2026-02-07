@@ -52,7 +52,7 @@
         color="#FFFFFF"
         width="3"
         align="right"
-        position="2.6 -1.32 0.03">
+        position="2.4 -1.48 0.10">
       </a-text>
 
       <!-- CONTROLES -->
@@ -101,6 +101,7 @@
     const txtPausa = document.querySelector('#txtPausa');
     const barraProgreso = document.querySelector('#barraProgreso');
     const textoDuracion = document.querySelector('#textoDuracion');
+    const estrellasContainer = document.querySelector('#estrellas');
 
     const DURACION_TOTAL = 114; // 1:54 en segundos
     const ANCHO_BARRA = 5;
@@ -110,6 +111,20 @@
       const seg = Math.floor(segundos % 60);
       return `${min}:${seg.toString().padStart(2, '0')}`;
     }
+
+    // Generar estrellas
+        for (let i = 0; i < 500; i++) {
+            let estrella = document.createElement('a-sphere');
+            let theta = Math.random() * Math.PI * 2;
+            let phi = Math.acos((Math.random() * 2) - 1);
+            let x = 50 * Math.sin(phi) * Math.cos(theta);
+            let y = 50 * Math.sin(phi) * Math.sin(theta);
+            let z = 50 * Math.cos(phi);
+            estrella.setAttribute('position', `${x} ${y} ${z}`);
+            estrella.setAttribute('radius', Math.random() * 0.15);
+            estrella.setAttribute('material', 'color: #FFF; shader: flat');
+            estrellasContainer.appendChild(estrella);
+        }
 
     window.onload = () => {
       setTimeout(() => contenedorBtn.emit('animarBoton'), 800);
@@ -180,6 +195,7 @@
   </script>
 </body>
 </html>
+
 
 
 
