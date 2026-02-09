@@ -32,7 +32,7 @@
       <a-video id="pantallaVideo" src="#videoUni" width="5" height="3"></a-video>
       <a-plane id="barraFondo" width="5" height="0.12" color="#696a6d" position="0 -1.6 0.01"></a-plane>
       <a-plane id="barraProgreso" width="0.01" height="0.12" color="#E3173E" position="-2.5 -1.6 0.02"></a-plane>
-      <a-text id="textoDuracion" value="0:00 / 2:02" color="#FFFFFF" width="3" align="right" position="2.4 -1.48 0.10"></a-text>
+      <a-text id="textoDuracion" value="0:00 / 0:00" color="#FFFFFF" width="3" align="right" position="2.4 -1.48 0.10"></a-text>
 
       <a-entity id="controles" position="0 -1.9 0.1">
         <a-circle id="btnReset" class="clickable" color="#FFFFFF" radius="0.2" position="-1.2 0 0">
@@ -64,6 +64,8 @@
       <a-camera look-controls wasd-controls>
         <a-cursor color="#FFD700" raycaster="objects: .clickable"></a-cursor>
       </a-camera>
+      <a-entity laser-controls="hand: right" raycaster="objects: .clickable" line="color: #FFD700; opacity: 0.9"></a-entity>
+      <a-entity laser-controls="hand: left" raycaster="objects: .clickable" line="color: #FFD700; opacity: 0.9"></a-entity>
     </a-entity>
   </a-scene>
 
@@ -78,7 +80,7 @@
     const textoDuracion = document.querySelector('#textoDuracion');
     const estrellasContainer = document.querySelector('#estrellas');
 
-    const DURACION_TOTAL = 114; 
+    let DURACION_TOTAL = 0;
     const ANCHO_BARRA = 5;
 
     function formatearTiempo(segundos) {
@@ -87,7 +89,12 @@
       return `${min}:${seg.toString().padStart(2, '0')}`;
     }
 
-    // Generar estrellas
+    video.addEventListener('loadedmetadata', () => {
+      DURACION_TOTAL = video.duration;
+      actualizarInterfaz(); // Inicializar valores
+    });
+
+    // Generar estrellas (se mantienen ocultas al inicio)
     for (let i = 0; i < 500; i++) {
         let estrella = document.createElement('a-sphere');
         let theta = Math.random() * Math.PI * 2;
@@ -100,29 +107,40 @@
         estrella.setAttribute('material', 'color: #FFF; shader: flat');
         estrella.setAttribute('animation', {
             property: 'material.opacity',
-            from: 0.3,
-            to: 1,
+            from: 0.3, to: 1,
             dur: Math.random() * 3000 + 1000,
-            dir: 'alternate',
-            loop: true
+            dir: 'alternate', loop: true
         });
         estrellasContainer.appendChild(estrella);
     }
 
-    // Usar el evento de escena cargada en lugar de window.onload
-    document.querySelector('a-scene').addEventListener('loaded', () => {
-      console.log("Escena cargada en VR");
-      contenedorBtn.setAttribute('visible', 'true');
-    });
+    // --- MEJORA DE TIEMPO: Loop de alta precisión ---
+    function actualizarInterfaz() {
+      if (!DURACION_TOTAL || video.paused) return;
+
+      const tiempoActual = video.currentTime;
+      const progreso = tiempoActual / DURACION_TOTAL;
+
+      // Actualizar Barra (Suave)
+      barraProgreso.setAttribute('width', progreso * ANCHO_BARRA);
+      barraProgreso.setAttribute('position', `${-2.5 + (progreso * ANCHO_BARRA) / 2} -1.6 0.02`);
+
+      // Actualizar Texto
+      textoDuracion.setAttribute('value', `${formatearTiempo(tiempoActual)} / ${formatearTiempo(DURACION_TOTAL)}`);
+
+      // Llamar al siguiente frame
+      requestAnimationFrame(actualizarInterfaz);
+    }
 
     document.querySelector('#btnAccion').addEventListener('click', () => {
       contenedorBtn.setAttribute('visible', 'false');
       telon.emit('cineStart'); 
       grupoVideo.setAttribute('visible', 'true');
-      video.play();
-      setTimeout(() => {
-        estrellasContainer.setAttribute('visible', 'true');
-      }, 800); 
+      
+      video.play().then(() => {
+          estrellasContainer.setAttribute('visible', 'true'); // Aparecen cuando inicia el video
+          actualizarInterfaz(); // Inicia el loop de tiempo
+      });
     });
 
     function volverAlMenu() {
@@ -140,6 +158,7 @@
     document.querySelector('#btnReset').addEventListener('click', () => {
       video.currentTime = 0;
       video.play();
+      actualizarInterfaz();
       txtPausa.setAttribute('value', 'PAUSA');
     });
 
@@ -147,26 +166,21 @@
     video.addEventListener('ended', volverAlMenu);
 
     document.querySelector('#btnPausa').addEventListener('click', () => {
-      if (video.paused) { video.play(); txtPausa.setAttribute('value', 'PAUSA'); }
-      else { video.pause(); txtPausa.setAttribute('value', 'PLAY'); }
+      if (video.paused) { 
+        video.play(); 
+        txtPausa.setAttribute('value', 'PAUSA');
+        actualizarInterfaz(); // Reanudar el loop suave
+      } else { 
+        video.pause(); 
+        txtPausa.setAttribute('value', 'PLAY'); 
+      }
     });
 
     document.querySelector('#btnNormal').addEventListener('click', () => video.playbackRate = 1);
     document.querySelector('#btnRapido').addEventListener('click', () => video.playbackRate = 4);
-
-    video.addEventListener('timeupdate', () => {
-      const tiempoActual = Math.min(video.currentTime, DURACION_TOTAL);
-      const progreso = tiempoActual / DURACION_TOTAL;
-      barraProgreso.setAttribute('width', progreso * ANCHO_BARRA);
-      barraProgreso.setAttribute('position', `${-2.5 + (progreso * ANCHO_BARRA) / 2} -1.6 0.02`);
-      textoDuracion.setAttribute('value', `${formatearTiempo(tiempoActual)} / 2:02`);
-    });
   </script>
 </body>
 </html>
-
-
-
 
 
 
