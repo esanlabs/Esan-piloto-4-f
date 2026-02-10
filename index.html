@@ -84,6 +84,7 @@
     const ANCHO_BARRA = 5;
 
     function formatearTiempo(segundos) {
+      if (isNaN(segundos)) return "0:00";
       const min = Math.floor(segundos / 60);
       const seg = Math.floor(segundos % 60);
       return `${min}:${seg.toString().padStart(2, '0')}`;
@@ -91,10 +92,10 @@
 
     video.addEventListener('loadedmetadata', () => {
       DURACION_TOTAL = video.duration;
-      actualizarInterfaz(); // Inicializar valores
+      textoDuracion.setAttribute('value', `0:00 / ${formatearTiempo(DURACION_TOTAL)}`);
     });
 
-    // Generar estrellas (se mantienen ocultas al inicio)
+    // Generar estrellas
     for (let i = 0; i < 500; i++) {
         let estrella = document.createElement('a-sphere');
         let theta = Math.random() * Math.PI * 2;
@@ -114,23 +115,28 @@
         estrellasContainer.appendChild(estrella);
     }
 
-    // --- MEJORA DE TIEMPO: Loop de alta precisión ---
+    // --- FUNCIÓN DE ACTUALIZACIÓN ---
     function actualizarInterfaz() {
-      if (!DURACION_TOTAL || video.paused) return;
+      if (!DURACION_TOTAL) return;
 
       const tiempoActual = video.currentTime;
       const progreso = tiempoActual / DURACION_TOTAL;
 
-      // Actualizar Barra (Suave)
-      barraProgreso.setAttribute('width', progreso * ANCHO_BARRA);
+      // Actualizar ancho y posición de la barra roja
+      barraProgreso.setAttribute('width', Math.max(0.01, progreso * ANCHO_BARRA));
       barraProgreso.setAttribute('position', `${-2.5 + (progreso * ANCHO_BARRA) / 2} -1.6 0.02`);
 
-      // Actualizar Texto
+      // Actualizar texto
       textoDuracion.setAttribute('value', `${formatearTiempo(tiempoActual)} / ${formatearTiempo(DURACION_TOTAL)}`);
 
-      // Llamar al siguiente frame
-      requestAnimationFrame(actualizarInterfaz);
+      // Mantener bucle si está reproduciendo
+      if (!video.paused) {
+        requestAnimationFrame(actualizarInterfaz);
+      }
     }
+
+    // RESPALDO: Forzar actualización con el avance del video
+    video.addEventListener('timeupdate', actualizarInterfaz);
 
     document.querySelector('#btnAccion').addEventListener('click', () => {
       contenedorBtn.setAttribute('visible', 'false');
@@ -138,8 +144,8 @@
       grupoVideo.setAttribute('visible', 'true');
       
       video.play().then(() => {
-          estrellasContainer.setAttribute('visible', 'true'); // Aparecen cuando inicia el video
-          actualizarInterfaz(); // Inicia el loop de tiempo
+          estrellasContainer.setAttribute('visible', 'true');
+          actualizarInterfaz();
       });
     });
 
@@ -158,8 +164,8 @@
     document.querySelector('#btnReset').addEventListener('click', () => {
       video.currentTime = 0;
       video.play();
-      actualizarInterfaz();
       txtPausa.setAttribute('value', 'PAUSA');
+      actualizarInterfaz();
     });
 
     document.querySelector('#btnSalir').addEventListener('click', volverAlMenu);
@@ -169,7 +175,7 @@
       if (video.paused) { 
         video.play(); 
         txtPausa.setAttribute('value', 'PAUSA');
-        actualizarInterfaz(); // Reanudar el loop suave
+        actualizarInterfaz(); 
       } else { 
         video.pause(); 
         txtPausa.setAttribute('value', 'PLAY'); 
@@ -181,11 +187,6 @@
   </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
